@@ -169,7 +169,7 @@ void stop()
     printf("\nareg = %d (%X)\n", areg, areg&0xff);
     running = false; 
 
-    printf("Memory:\n");
+    printf("\nMemory:\n");
     int i;
     for (i = 0; i < 256; i++)
     {
