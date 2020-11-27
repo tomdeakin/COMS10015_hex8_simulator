@@ -1,9 +1,21 @@
+/*
+   Based on original code by David May.
+   Modified by Tom Deakin, 2020
+ */
 
 #include "stdio.h"
+
+/* Function defintions */
+void load(char *filename);
+int getbyte();
+int gethex();
+void stop();
+
 
 #define true     1
 #define false    0
 
+/* Hex 8 Opcodes */
 #define i_ldam   0x0
 #define i_ldbm   0x1
 #define i_stam   0x2
@@ -27,11 +39,14 @@
 
 #define i_pfix   0xF
 
+/* Input file */
 FILE *codefile;
 
+/* 256 bytes of processor memory */
 unsigned char mem[256];
 unsigned char *pmem = (unsigned char *) mem;
 
+/* Registers */
 unsigned char pc;
 
 unsigned char areg;
@@ -40,22 +55,38 @@ unsigned char oreg;
 
 unsigned char inst;
 
+/* Simulator variables */
 unsigned int running;
+/* Number of cycles executed */
+unsigned int cycles;
 
-main() 
+int main(int argc, char *argv[])
 {
   printf("\n");
-	
-  load();
-	
-  running = true;	
-	
+
+  /* Check for input file */
+  if (argc != 2)
+  {
+    printf("Usage: %s a.hex\n", argv[0]);
+    return 1;
+  }
+  
+  /* Load the program into memory from the file */
+  load(argv[1]);
+
+  running = true;
+
   oreg = 0; 
   pc = 0;
-	
-  while (running) 
 
-  { inst = pmem[pc]; 
+  cycles = 0;
+
+
+  while (running)
+  {
+    cycles += 1;
+
+    inst = pmem[pc];
 
     pc = pc + 1;	
 
@@ -64,7 +95,7 @@ main()
     switch ((inst >> 4) & 0xf)
     {
 	  case i_ldam: areg = mem[oreg]; oreg = 0; break;
-	  case i_ldbm: breg = mem[oreg]; oreg = 0; break;
+          case i_ldbm: breg = mem[oreg]; oreg = 0; break;
 	  case i_stam: mem[oreg] = areg; oreg = 0; break;	  
 		  
 	  case i_ldac: areg = oreg; oreg = 0; break;
@@ -91,10 +122,11 @@ main()
 	
 }	
 		  		  		  
-load()
-{ int n;
+void load(char *filename)
+{
+  int n;
   int i;
-  codefile = fopen("a.bin", "rb");
+  codefile = fopen(filename, "rb");
   n = getbyte();
   i = 0;	
   while (n != EOF)
@@ -104,8 +136,9 @@ load()
   };
 }
 
-getbyte()
-{ int high;
+int getbyte()
+{
+  int high;
   high = gethex();
   if (high == EOF)
 	return EOF;
@@ -113,8 +146,9 @@ getbyte()
     return (high << 4) | gethex();
 }
 
-gethex() 
-{ int h;
+int gethex()
+{
+  int h;
   h = fgetc(codefile);
   while ((h == ' ') || (h == '\n')) 
 	h = fgetc(codefile);
@@ -127,10 +161,20 @@ gethex()
 	return h - '0';
 }
 
-stop() 
-{ if (oreg == 0xFE)
-  { printf("\nareg = %d\n", areg);
+void stop()
+{
+  if (oreg == 0xFE)
+  {
+    printf("\ncycles = %d\n", cycles);
+    printf("\nareg = %d (%X)\n", areg, areg&0xff);
     running = false; 
+
+    printf("Memory:\n");
+    int i;
+    for (i = 0; i < 256; i++)
+    {
+      printf("%d: %X\n", i, mem[i] & 0xff);
+    }
   }	  
 }
 
