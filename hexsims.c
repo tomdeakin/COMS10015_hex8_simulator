@@ -4,6 +4,7 @@
  */
 
 #include "stdio.h"
+#include <ctype.h>
 
 /* Function defintions */
 void load(char *filename);
@@ -154,7 +155,10 @@ int gethex()
 	h = fgetc(codefile);
   if (h == EOF)
 	return EOF;
-  else	  
+  else
+  /* Convert any lower case chars to uppercase */
+  if ((h >= 'a') && (h <= 'f'))
+	h = toupper(h);
   if ((h >= 'A') && (h <= 'F'))  
 	return (h - 'A') + 10;
   else 
