@@ -96,16 +96,16 @@ int main(int argc, char *argv[])
     switch ((inst >> 4) & 0xf)
     {
 	  case i_ldam: areg = mem[oreg]; oreg = 0; break;
-          case i_ldbm: breg = mem[oreg]; oreg = 0; break;
+    case i_ldbm: breg = mem[oreg]; oreg = 0; break;
 	  case i_stam: mem[oreg] = areg; oreg = 0; break;	  
 		  
 	  case i_ldac: areg = oreg; oreg = 0; break;
 	  case i_ldbc: breg = oreg; oreg = 0; break;
 	  case i_ldap: areg = pc + oreg; oreg = 0; break;
 		  
-	  case i_ldai: areg = mem[areg + oreg]; oreg = 0; break;
-	  case i_ldbi: breg = mem[breg + oreg]; oreg = 0; break;
-	  case i_stai: mem[breg + oreg] = areg; oreg = 0; break;	  
+	  case i_ldai: areg = mem[(unsigned char) (areg + oreg)]; oreg = 0; break;
+	  case i_ldbi: breg = mem[(unsigned char) (breg + oreg)]; oreg = 0; break;
+	  case i_stai: mem[(unsigned char) (breg + oreg)] = areg; oreg = 0; break;	  
 		  
 	  case i_br:   stop(); pc = pc + oreg; oreg = 0; break;
 	  case i_brz:  if (areg == 0) pc = pc + oreg; oreg = 0; break;
